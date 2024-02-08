@@ -1,0 +1,26 @@
+{
+  "name": "union",
+  "version": "0.0.1",
+  "description": "",
+  "main": "binaries/union.js",
+  "bin": {
+    "union": "./binaries/union.js"
+  },
+  "scripts": {
+    "start": "node ./binaries/union.js",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/i-a-n/union"
+  },
+  "keywords": [
+    "server"
+  ],
+  "author": "@i-a-n",
+  "license": "Apache-2.0",
+  "devDependencies": {
+    "typescript": "5.3.3"
+  }
+}

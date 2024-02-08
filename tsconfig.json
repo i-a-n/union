@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2018", // Set according to your Node.js version compatibility
+    "module": "commonjs",
+    "outDir": "./binaries",
+    "rootDir": "./source",
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["source/**/*"],
+  "exclude": ["node_modules", "**/*.spec.ts"]
+}
+
