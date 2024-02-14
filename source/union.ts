@@ -33,13 +33,13 @@ switch (args[0]) {
      * both instantiate a pm2 daemon AND have it call a dynamically-configured server.
      */
     if (isChildProcess()) {
-      const app = configureTheApp();
-      const port = args[1] || DEFAULT_HTTP_PORT;
-      app.listen(port, () => console.log(`Server listening on port ${port}`));
+      const httpApp = configureTheApp();
+      const httpPort = args[1] || DEFAULT_HTTP_PORT;
+      httpApp.listen(httpPort);
     } else {
       pm2.connect((err: Error) => {
         if (err) {
-          console.error("Error connecting to PM2:", err);
+          console.error("Error connecting to pm2:", err);
           process.exit(2);
         }
 
