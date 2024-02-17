@@ -5,10 +5,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const pm2_1 = __importDefault(require("pm2"));
+const ssl_1 = __importDefault(require("./server/ssl"));
 const configure_1 = __importDefault(require("./server/configure"));
 const status_1 = __importDefault(require("./commands/status"));
 const stop_1 = __importDefault(require("./commands/stop"));
 const DEFAULT_HTTP_PORT = /* 80 */ 3000;
+const DEFAULT_HTTPS_PORT = /* 443 */ 3443;
 // Check if it's the child process
 function isChildProcess() {
     return process.env.CHILD_PROCESS === "true";
@@ -34,7 +36,10 @@ switch (args[0]) {
         if (isChildProcess()) {
             const httpApp = (0, configure_1.default)();
             const httpPort = args[1] || DEFAULT_HTTP_PORT;
+            const httpsApp = (0, ssl_1.default)(httpApp);
+            const httpsPort = args[2] || DEFAULT_HTTPS_PORT;
             httpApp.listen(httpPort);
+            httpsApp.listen(httpsPort);
         }
         else {
             pm2_1.default.connect((err) => {
@@ -50,6 +55,8 @@ switch (args[0]) {
                     env: {
                         CHILD_PROCESS: "true",
                     },
+                    output: ".union/output.log", // Standard output log
+                    error: ".union/error.log", // Standard error log
                 }, (err, apps) => {
                     pm2_1.default.disconnect(); // Disconnect after starting
                     if (err)

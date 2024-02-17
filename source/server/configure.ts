@@ -5,29 +5,23 @@ import path from "path";
 import serveStatic from "serve-static";
 import vhost from "vhost";
 
-import { isValidDomain } from "../helper-code/utilities";
+import { findDomainSubdirectories } from "../helper-code/utilities";
 
-/*
- * Async function to find subdirectories matching domain name pattern. Honestly
- * not too sure whether async is right here. I think we could use a `syncReaddr`
- * or something like that instead of `fs.promises.readdir`, if we start seeing
- * odd filesystem bugs, to make it synchronous. That could simplify things and
- * I'm sure the speed difference is negligible.
- */
-const findDomainSubdirectories = async (): Promise<string[]> => {
-  const currentDir = process.cwd();
-  const entries = await fs.promises.readdir(currentDir, {
-    withFileTypes: true,
-  });
-  /*
-   * Note that this isn't recursive. We're only looking for direct child subdirectories
-   * that are domain names, not grandchild and great-great-great-greatgrandchild dirs.
-   */
-  const directories = entries
-    .filter((entry) => entry.isDirectory() && isValidDomain(entry.name))
-    .map((entry) => entry.name);
-  return directories;
-};
+// Synchronous function to check for the existence of a direct-child 'html' directory
+function containsHtmlDirectory(pathToDirectory: string): boolean {
+  try {
+    // Read the contents of the directory synchronously
+    const entries = fs.readdirSync(pathToDirectory, { withFileTypes: true });
+    // Check if any entry is a directory named 'html'
+    const hasHtmlDir = entries.some(
+      (dirent) => dirent.isDirectory() && dirent.name === "html"
+    );
+    return hasHtmlDir;
+  } catch (error) {
+    console.error("Error checking for html directory:", error);
+    return false;
+  }
+}
 
 /*
  * Core logic of this whole library, arguably. Should return a full express() app, ready to be
@@ -44,6 +38,7 @@ const configureTheApp = (): ExpressAppType => {
        * sophisticated eventually. For now, just static serving.
        */
       matches.forEach((match) => {
+        const pathToDirectory = path.join(process.cwd(), match);
         /*
          * We need to use the Express-developed "connect()" middleware thing. See:
          * https://www.npmjs.com/package/connect
@@ -55,10 +50,14 @@ const configureTheApp = (): ExpressAppType => {
          * library here because, once again, Express said so:
          * https://www.npmjs.com/package/serve-static
          */
-        domainSpecificMiddleware.use(
-          "/",
-          serveStatic(path.join(process.cwd(), match))
-        );
+        if (containsHtmlDirectory(pathToDirectory)) {
+          domainSpecificMiddleware.use(
+            "/",
+            serveStatic(path.join(pathToDirectory, "html"))
+          );
+        } else {
+          domainSpecificMiddleware.use("/", serveStatic(pathToDirectory));
+        }
 
         /*
          * And then, you guessed it, we use the Express-developed "vhost" to create a virtual
@@ -69,8 +68,6 @@ const configureTheApp = (): ExpressAppType => {
       });
     })
     .catch((err) => {
-      // Note that I'm afraid this error gets eaten by the pm2 parent process.
-      // TODO: make it not do that!
       console.error("Error:", err);
     });
 

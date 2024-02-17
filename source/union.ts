@@ -2,11 +2,13 @@
 
 import pm2 from "pm2";
 
+import configureSSL from "./server/ssl";
 import configureTheApp from "./server/configure";
 import showStatus from "./commands/status";
 import stopAllProcesses from "./commands/stop";
 
 const DEFAULT_HTTP_PORT = /* 80 */ 3000;
+const DEFAULT_HTTPS_PORT = /* 443 */ 3443;
 
 // Check if it's the child process
 function isChildProcess() {
@@ -35,7 +37,12 @@ switch (args[0]) {
     if (isChildProcess()) {
       const httpApp = configureTheApp();
       const httpPort = args[1] || DEFAULT_HTTP_PORT;
+
+      const httpsApp = configureSSL(httpApp);
+      const httpsPort = args[2] || DEFAULT_HTTPS_PORT;
+
       httpApp.listen(httpPort);
+      httpsApp.listen(httpsPort);
     } else {
       pm2.connect((err: Error) => {
         if (err) {
@@ -52,6 +59,8 @@ switch (args[0]) {
             env: {
               CHILD_PROCESS: "true",
             },
+            output: ".union/output.log", // Standard output log
+            error: ".union/error.log", // Standard error log
           },
           (err, apps) => {
             pm2.disconnect(); // Disconnect after starting
