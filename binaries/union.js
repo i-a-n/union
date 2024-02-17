@@ -9,8 +9,8 @@ const ssl_1 = __importDefault(require("./server/ssl"));
 const configure_1 = __importDefault(require("./server/configure"));
 const status_1 = __importDefault(require("./commands/status"));
 const stop_1 = __importDefault(require("./commands/stop"));
-const DEFAULT_HTTP_PORT = /* 80 */ 3000;
-const DEFAULT_HTTPS_PORT = /* 443 */ 3443;
+const DEFAULT_HTTP_PORT = 80;
+const DEFAULT_HTTPS_PORT = 443;
 // Check if it's the child process
 function isChildProcess() {
     return process.env.CHILD_PROCESS === "true";

@@ -7,8 +7,8 @@ import configureTheApp from "./server/configure";
 import showStatus from "./commands/status";
 import stopAllProcesses from "./commands/stop";
 
-const DEFAULT_HTTP_PORT = /* 80 */ 3000;
-const DEFAULT_HTTPS_PORT = /* 443 */ 3443;
+const DEFAULT_HTTP_PORT = 80;
+const DEFAULT_HTTPS_PORT = 443;
 
 // Check if it's the child process
 function isChildProcess() {
