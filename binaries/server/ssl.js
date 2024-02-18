@@ -30,19 +30,14 @@ const getCertificateFiles = (match) => {
 const configureSSL = (app) => {
     const certificates = [];
     // Loop through directories in `./certificates`, looking for domain names
-    (0, utilities_1.findDomainSubdirectories)("./certificates")
-        .then((matches) => {
-        console.log("found the following SSL pointers: ", matches);
-        matches.forEach((match) => {
-            certificates.push({
-                hostname: match,
-                ...getCertificateFiles(match),
-            });
+    const matches = (0, utilities_1.findDomainSubdirectories)("./certificates");
+    matches.forEach((match) => {
+        certificates.push({
+            hostname: match,
+            ...getCertificateFiles(match),
         });
-    })
-        .catch((err) => {
-        console.log("Error in configureSSL, likely no certificates directory:", err);
     });
+    console.log("creating SSL server with these certs: ", certificates);
     return vhttps_1.default.createServer({}, certificates, app);
 };
 exports.default = configureSSL;

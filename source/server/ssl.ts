@@ -33,22 +33,15 @@ const configureSSL = (app: ExpressType) => {
   const certificates: Credential[] = [];
 
   // Loop through directories in `./certificates`, looking for domain names
-  findDomainSubdirectories("./certificates")
-    .then((matches) => {
-      console.log("found the following SSL pointers: ", matches);
-      matches.forEach((match) => {
-        certificates.push({
-          hostname: match,
-          ...getCertificateFiles(match),
-        });
-      });
-    })
-    .catch((err) => {
-      console.log(
-        "Error in configureSSL, likely no certificates directory:",
-        err
-      );
+  const matches = findDomainSubdirectories("./certificates");
+  matches.forEach((match) => {
+    certificates.push({
+      hostname: match,
+      ...getCertificateFiles(match),
     });
+  });
+
+  console.log("creating SSL server with these certs: ", certificates);
 
   return vhttps.createServer({}, certificates, app);
 };

@@ -42,18 +42,25 @@ exports.isValidDomain = isValidDomain;
  * odd filesystem bugs, to make it synchronous. That could simplify things and
  * I'm sure the speed difference is negligible.
  */
-const findDomainSubdirectories = async (pathToCheck = ".") => {
+const findDomainSubdirectories = (pathToCheck = ".") => {
     const fullPath = path_1.default.join(process.cwd(), pathToCheck);
-    const entries = await fs_1.default.promises.readdir(fullPath, {
-        withFileTypes: true,
-    });
-    /*
-     * Note that this isn't recursive. We're only looking for direct child subdirectories
-     * that are domain names, not grandchild and great-great-great-greatgrandchild dirs.
-     */
-    const directories = entries
-        .filter((entry) => entry.isDirectory() && (0, exports.isValidDomain)(entry.name))
-        .map((entry) => entry.name);
-    return directories;
+    try {
+        const entries = fs_1.default.readdirSync(fullPath, {
+            withFileTypes: true,
+        });
+        /*
+         * Note that this isn't recursive. We're only looking for direct child subdirectories
+         * that are domain names, not grandchild and great-great-great-greatgrandchild dirs.
+         */
+        // TODO: Ensure isSymbolicLink is only for directories
+        return entries
+            .filter((entry) => (entry.isDirectory() || entry.isSymbolicLink()) &&
+            (0, exports.isValidDomain)(entry.name))
+            .map((entry) => entry.name);
+    }
+    catch (error) {
+        console.log("Error reading subdirectories");
+        return [];
+    }
 };
 exports.findDomainSubdirectories = findDomainSubdirectories;

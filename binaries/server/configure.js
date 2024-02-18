@@ -13,11 +13,23 @@ const utilities_1 = require("../helper-code/utilities");
 // Synchronous function to check for the existence of a direct-child 'html' directory
 function containsHtmlDirectory(pathToDirectory) {
     try {
-        // Read the contents of the directory synchronously
         const entries = fs_1.default.readdirSync(pathToDirectory, { withFileTypes: true });
-        // Check if any entry is a directory named 'html'
-        const hasHtmlDir = entries.some((dirent) => dirent.isDirectory() && dirent.name === "html");
-        return hasHtmlDir;
+        for (const dirent of entries) {
+            if (dirent.name === "html") {
+                if (dirent.isDirectory()) {
+                    return true; // Directly a directory
+                }
+                else if (dirent.isSymbolicLink()) {
+                    // Resolve symlink and check if it's a directory
+                    const resolvedPath = path_1.default.join(pathToDirectory, dirent.name);
+                    const stats = fs_1.default.statSync(resolvedPath);
+                    if (stats.isDirectory()) {
+                        return true; // Symlink pointing to a directory
+                    }
+                }
+            }
+        }
+        return false; // No html directory or symlink pointing to a directory found
     }
     catch (error) {
         console.error("Error checking for html directory:", error);
@@ -31,40 +43,31 @@ function containsHtmlDirectory(pathToDirectory) {
 const configureTheApp = () => {
     const app = (0, express_1.default)();
     // Loop through candidate subdirectories and configure each one into `app`
-    (0, utilities_1.findDomainSubdirectories)()
-        .then((matches) => {
+    const matches = (0, utilities_1.findDomainSubdirectories)();
+    matches.forEach((match) => {
+        const pathToDirectory = path_1.default.join(process.cwd(), match);
         /*
-         * For each valid domain subdirectory, configure it. This part will need to get much more
-         * sophisticated eventually. For now, just static serving.
+         * We need to use the Express-developed "connect()" middleware thing. See:
+         * https://www.npmjs.com/package/connect
          */
-        matches.forEach((match) => {
-            const pathToDirectory = path_1.default.join(process.cwd(), match);
-            /*
-             * We need to use the Express-developed "connect()" middleware thing. See:
-             * https://www.npmjs.com/package/connect
-             */
-            const domainSpecificMiddleware = (0, connect_1.default)();
-            /*
-             * Now each domain needs to `use()` its own static path. Using the `serve-static`
-             * library here because, once again, Express said so:
-             * https://www.npmjs.com/package/serve-static
-             */
-            if (containsHtmlDirectory(pathToDirectory)) {
-                domainSpecificMiddleware.use("/", (0, serve_static_1.default)(path_1.default.join(pathToDirectory, "html")));
-            }
-            else {
-                domainSpecificMiddleware.use("/", (0, serve_static_1.default)(pathToDirectory));
-            }
-            /*
-             * And then, you guessed it, we use the Express-developed "vhost" to create a virtual
-             * host for this domain-specific middleware we just configured:
-             * https://www.npmjs.com/package/vhost
-             */
-            app.use((0, vhost_1.default)(match, domainSpecificMiddleware));
-        });
-    })
-        .catch((err) => {
-        console.error("Error:", err);
+        const domainSpecificMiddleware = (0, connect_1.default)();
+        /*
+         * Now each domain needs to `use()` its own static path. Using the `serve-static`
+         * library here because, once again, Express said so:
+         * https://www.npmjs.com/package/serve-static
+         */
+        if (containsHtmlDirectory(pathToDirectory)) {
+            domainSpecificMiddleware.use("/", (0, serve_static_1.default)(path_1.default.join(pathToDirectory, "html")));
+        }
+        else {
+            domainSpecificMiddleware.use("/", (0, serve_static_1.default)(pathToDirectory));
+        }
+        /*
+         * And then, you guessed it, we use the Express-developed "vhost" to create a virtual
+         * host for this domain-specific middleware we just configured:
+         * https://www.npmjs.com/package/vhost
+         */
+        app.use((0, vhost_1.default)(match, domainSpecificMiddleware));
     });
     return app;
 };
