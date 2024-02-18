@@ -17,7 +17,7 @@ const showStatus = () => {
         process.exit(2);
       }
 
-      console.log("PM2 Processes Status:");
+      console.log("union servers:");
       processDescriptionList.forEach((proc) => {
         console.log(
           `Status: ${proc.pm2_env?.status}, PID: ${

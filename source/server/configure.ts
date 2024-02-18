@@ -5,24 +5,23 @@ import path from "path";
 import serveStatic from "serve-static";
 import vhost from "vhost";
 
-import { findDomainSubdirectories } from "../helper-code/utilities";
+import {
+  findDomainSubdirectories,
+  isDirectoryOrSymlinkDirectory,
+} from "../helper-code/utilities";
 
 // Synchronous function to check for the existence of a direct-child 'html' directory
 function containsHtmlDirectory(pathToDirectory: string): boolean {
   try {
-    const entries = fs.readdirSync(pathToDirectory, { withFileTypes: true });
-    for (const dirent of entries) {
-      if (dirent.name === "html") {
-        if (dirent.isDirectory()) {
-          return true; // Directly a directory
-        } else if (dirent.isSymbolicLink()) {
-          // Resolve symlink and check if it's a directory
-          const resolvedPath = path.join(pathToDirectory, dirent.name);
-          const stats = fs.statSync(resolvedPath);
-          if (stats.isDirectory()) {
-            return true; // Symlink pointing to a directory
-          }
-        }
+    const filesAndFoldersToCheck = fs.readdirSync(pathToDirectory, {
+      withFileTypes: true,
+    });
+    for (const fileOrFolder of filesAndFoldersToCheck) {
+      if (
+        fileOrFolder.name === "html" &&
+        isDirectoryOrSymlinkDirectory(pathToDirectory, fileOrFolder)
+      ) {
+        return true;
       }
     }
     return false; // No html directory or symlink pointing to a directory found

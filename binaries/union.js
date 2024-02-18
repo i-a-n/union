@@ -9,6 +9,7 @@ const ssl_1 = __importDefault(require("./server/ssl"));
 const configure_1 = __importDefault(require("./server/configure"));
 const status_1 = __importDefault(require("./commands/status"));
 const stop_1 = __importDefault(require("./commands/stop"));
+const help_1 = __importDefault(require("./commands/help"));
 const DEFAULT_HTTP_PORT = 80;
 const DEFAULT_HTTPS_PORT = 443;
 // Check if it's the child process
@@ -23,6 +24,9 @@ switch (args[0]) {
         break;
     case "stop":
         (0, stop_1.default)();
+        break;
+    case "help":
+        (0, help_1.default)();
         break;
     default:
         /**
@@ -63,5 +67,6 @@ switch (args[0]) {
                         throw err;
                 });
             });
+            console.log("server starting. see the .union directory for startup logs.");
         }
 }

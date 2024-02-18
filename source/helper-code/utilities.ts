@@ -10,6 +10,27 @@ export const prettyMs = (ms: number) => {
   return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
 };
 
+/*
+ * Helper function to determine whether an entry is either 1) a directory or 2) a symlink that points
+ * to a directory
+ */
+export const isDirectoryOrSymlinkDirectory = (
+  parentDirectoryPath: string,
+  entry: fs.Dirent
+): boolean => {
+  if (entry.isDirectory()) {
+    return true; // Directly a directory
+  } else if (entry.isSymbolicLink()) {
+    // Resolve symlink and check if it's a directory
+    const resolvedPath = path.join(parentDirectoryPath, entry.name);
+    const fileOrDirectory = fs.statSync(resolvedPath);
+    if (fileOrDirectory.isDirectory()) {
+      return true; // Symlink pointing to a directory
+    }
+  }
+  return false;
+};
+
 // Function to check if a directory name is a valid domain/subdomain
 export const isValidDomain = (name: string): boolean => {
   const domainRegex =
@@ -50,11 +71,10 @@ export const findDomainSubdirectories = (
      * Note that this isn't recursive. We're only looking for direct child subdirectories
      * that are domain names, not grandchild and great-great-great-greatgrandchild dirs.
      */
-    // TODO: Ensure isSymbolicLink is only for directories
     return entries
       .filter(
         (entry) =>
-          (entry.isDirectory() || entry.isSymbolicLink()) &&
+          isDirectoryOrSymlinkDirectory(fullPath, entry) &&
           isValidDomain(entry.name)
       )
       .map((entry) => entry.name);

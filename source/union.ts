@@ -6,6 +6,7 @@ import configureSSL from "./server/ssl";
 import configureTheApp from "./server/configure";
 import showStatus from "./commands/status";
 import stopAllProcesses from "./commands/stop";
+import showHelp from "./commands/help";
 
 const DEFAULT_HTTP_PORT = 80;
 const DEFAULT_HTTPS_PORT = 443;
@@ -24,6 +25,9 @@ switch (args[0]) {
     break;
   case "stop":
     stopAllProcesses();
+    break;
+  case "help":
+    showHelp();
     break;
   default:
     /**
@@ -68,5 +72,9 @@ switch (args[0]) {
           }
         );
       });
+
+      console.log(
+        "server starting. see the .union directory for startup logs."
+      );
     }
 }
