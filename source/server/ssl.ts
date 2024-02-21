@@ -3,7 +3,7 @@ import path from "path";
 import vhttps, { Credential } from "vhttps";
 import { Express as ExpressType } from "express";
 
-import { findDomainSubdirectories } from "../helper-code/utilities";
+import { findDomainSubdirectories } from "../helper-code/tree-traversal";
 
 const getCertificateFiles = (
   match: string
@@ -15,14 +15,14 @@ const getCertificateFiles = (
   try {
     cert = fs.readFileSync(path.join(basePath, "fullchain.pem"), "utf8");
   } catch (error: any) {
-    console.error(`Error reading certificate file for ${match}:`, error);
+    console.error(`error reading certificate file for ${match}:`, error);
     cert = "";
   }
 
   try {
     key = fs.readFileSync(path.join(basePath, "privkey.pem"), "utf8");
   } catch (error: any) {
-    console.error(`Error reading key file for ${match}:`, error);
+    console.error(`error reading key file for ${match}:`, error);
     key = "";
   }
 

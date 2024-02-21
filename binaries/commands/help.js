@@ -1,14 +1,14 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const showHelp = () => {
-    console.log(`union server commands:`);
-    console.log(`npx union                           - start the server`);
-    console.log(`npx union [http port] [https port]  - start the server with different port numbers`);
-    console.log(`npx union status                    - status of the server`);
-    console.log(`npx union stop                      - stop the server`);
-    console.log(`npx union lint                      - check configs and permissions`);
-    console.log(``);
-    console.log(`logs are stored in a directory called \`.union\`, which is located in whichever directory you were in
+    console.log(`union server commands:
+npx union                           - start the server
+npx union [http port] [https port]  - start the server with different port numbers
+npx union status                    - status of the server
+npx union stop                      - stop the server
+npx union lint                      - check configs and permissions
+
+logs are stored in a directory called \`.union\`, which is located in whichever directory you were in
 when you ran the start command.`);
 };
 exports.default = showHelp;

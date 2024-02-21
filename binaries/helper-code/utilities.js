@@ -3,17 +3,17 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findDomainSubdirectories = exports.isValidDomain = exports.isDirectoryOrSymlinkDirectory = exports.prettyMs = void 0;
+exports.isValidDomain = exports.isDirectoryOrSymlinkDirectory = exports.formatElapsedTime = void 0;
 const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
 // Helper function to format milliseconds into human-readable format
-const prettyMs = (ms) => {
+const formatElapsedTime = (ms) => {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
     return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
 };
-exports.prettyMs = prettyMs;
+exports.formatElapsedTime = formatElapsedTime;
 /*
  * Helper function to determine whether an entry is either 1) a directory or 2) a symlink that points
  * to a directory
@@ -54,31 +54,3 @@ const isValidDomain = (name) => {
     return domainRegex.test(name);
 };
 exports.isValidDomain = isValidDomain;
-/*
- * Async function to find subdirectories matching domain name pattern. Honestly
- * not too sure whether async is right here. I think we could use a `syncReaddr`
- * or something like that instead of `fs.promises.readdir`, if we start seeing
- * odd filesystem bugs, to make it synchronous. That could simplify things and
- * I'm sure the speed difference is negligible.
- */
-const findDomainSubdirectories = (pathToCheck = ".") => {
-    const fullPath = path_1.default.join(process.cwd(), pathToCheck);
-    try {
-        const entries = fs_1.default.readdirSync(fullPath, {
-            withFileTypes: true,
-        });
-        /*
-         * Note that this isn't recursive. We're only looking for direct child subdirectories
-         * that are domain names, not grandchild and great-great-great-greatgrandchild dirs.
-         */
-        return entries
-            .filter((entry) => (0, exports.isDirectoryOrSymlinkDirectory)(fullPath, entry) &&
-            (0, exports.isValidDomain)(entry.name))
-            .map((entry) => entry.name);
-    }
-    catch (error) {
-        console.log("Error reading subdirectories");
-        return [];
-    }
-};
-exports.findDomainSubdirectories = findDomainSubdirectories;

@@ -1,18 +1,18 @@
 import pm2 from "pm2";
 
-import { prettyMs } from "../helper-code/utilities";
+import { formatElapsedTime } from "../helper-code/utilities";
 
 // Function to display the status of all pm2 processes
 const showStatus = () => {
   pm2.connect((err) => {
     if (err) {
-      console.error("Error connecting to pm2:", err);
+      console.error("error connecting to daemon manager:", err);
       process.exit(2);
     }
 
     pm2.list((err, processDescriptionList) => {
       if (err) {
-        console.error("Error retrieving pm2 process list:", err);
+        console.error("error retrieving process list:", err);
         pm2.disconnect();
         process.exit(2);
       }
@@ -20,9 +20,11 @@ const showStatus = () => {
       console.log("union servers:");
       processDescriptionList.forEach((proc) => {
         console.log(
-          `Status: ${proc.pm2_env?.status}, PID: ${
+          `status: ${proc.pm2_env?.status}, process ID: ${
             proc.pid
-          }, Uptime: ${prettyMs(Date.now() - (proc.pm2_env?.pm_uptime ?? 0))}`
+          }, uptime: ${formatElapsedTime(
+            Date.now() - (proc.pm2_env?.pm_uptime ?? 0)
+          )}`
         );
       });
 

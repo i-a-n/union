@@ -7,15 +7,15 @@ const pm2_1 = __importDefault(require("pm2"));
 const stopAllProcesses = () => {
     pm2_1.default.connect((err) => {
         if (err) {
-            console.error("Error connecting to pm2:", err);
+            console.error("error connecting to daemon manager:", err);
             process.exit(2);
         }
         pm2_1.default.delete("all", (err) => {
             if (err) {
-                console.error("Error stopping processes:", err);
+                console.error("error stopping processes:", err);
             }
             else {
-                console.log("All processes stopped and deleted.");
+                console.log("all processes stopped and deleted.");
             }
             pm2_1.default.disconnect();
         });

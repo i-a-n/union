@@ -38,17 +38,20 @@ switch (args[0]) {
          * both instantiate a pm2 daemon AND have it call a dynamically-configured server.
          */
         if (isChildProcess()) {
-            const httpApp = (0, configure_1.default)();
-            const httpPort = args[1] || DEFAULT_HTTP_PORT;
-            const httpsApp = (0, ssl_1.default)(httpApp);
-            const httpsPort = args[2] || DEFAULT_HTTPS_PORT;
-            httpApp.listen(httpPort);
-            httpsApp.listen(httpsPort);
+            (0, configure_1.default)()
+                .then((httpApp) => {
+                const httpPort = args[1] || DEFAULT_HTTP_PORT;
+                const httpsApp = (0, ssl_1.default)(httpApp);
+                const httpsPort = args[2] || DEFAULT_HTTPS_PORT;
+                httpApp.listen(httpPort);
+                httpsApp.listen(httpsPort);
+            })
+                .catch((error) => console.error("error configuring app: ", error));
         }
         else {
             pm2_1.default.connect((err) => {
                 if (err) {
-                    console.error("Error connecting to pm2:", err);
+                    console.error("error connecting to daemon manager:", err);
                     process.exit(2);
                 }
                 pm2_1.default.start({
