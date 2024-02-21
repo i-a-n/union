@@ -35,10 +35,6 @@ const containsHtmlDirectory = (pathToDirectory: string): boolean => {
   }
 };
 
-const pathToFileURL = (filePath: string) => {
-  return new URL(`file://${filePath}`);
-};
-
 /*
  * Core logic of this whole library, arguably. Should return a full express() app, ready to be
  * served via http.
@@ -66,13 +62,11 @@ const configureHttpServer = async (): Promise<express.Express> => {
         // Process config file
         try {
           // Dynamically import the config file's exported app
-          const importedConfig = await import(
-            pathToFileURL(pathToConfigFile).href
-          );
-          const app = importedConfig.default; // Using default export
+          const importedConfig = await import(pathToConfigFile);
+          const customAppConfig = importedConfig.default; // Using default export
 
           // Use the imported app as middleware
-          domainSpecificMiddleware.use(app);
+          domainSpecificMiddleware.use(customAppConfig);
         } catch (error) {
           console.error("error importing config file:", error);
         }

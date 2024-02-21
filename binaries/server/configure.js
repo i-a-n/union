@@ -75,16 +75,14 @@ const configureHttpServer = async () => {
         const domainSpecificMiddleware = (0, connect_1.default)();
         // Search for .config files
         const pathToConfigFile = (0, tree_traversal_1.findSingleFile)(pathToDomain, ".union.config.js");
-        console.log("looking for config file for domain ", match);
-        console.log("found ", pathToConfigFile);
         if (pathToConfigFile && fs_1.default.existsSync(pathToConfigFile)) {
             // Process config file
             try {
                 // Dynamically import the config file's exported app
-                const importedConfig = await Promise.resolve(`${pathToFileURL(pathToConfigFile).href}`).then(s => __importStar(require(s)));
-                const app = importedConfig.default; // Using default export
+                const importedConfig = await Promise.resolve(`${pathToConfigFile}`).then(s => __importStar(require(s)));
+                const customAppConfig = importedConfig.default; // Using default export
                 // Use the imported app as middleware
-                domainSpecificMiddleware.use(app);
+                domainSpecificMiddleware.use(customAppConfig);
             }
             catch (error) {
                 console.error("error importing config file:", error);
