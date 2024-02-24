@@ -36,6 +36,7 @@ const vhost_1 = __importDefault(require("vhost"));
 const utilities_1 = require("../helper-code/utilities");
 const tree_traversal_1 = require("../helper-code/tree-traversal");
 const _404_1 = __importDefault(require("../html/404"));
+const logger_1 = __importDefault(require("../helper-code/logger"));
 // Synchronous function to check for the existence of a direct-child 'html' directory
 const containsHtmlDirectory = (pathToDirectory) => {
     try {
@@ -55,9 +56,6 @@ const containsHtmlDirectory = (pathToDirectory) => {
         return false;
     }
 };
-const pathToFileURL = (filePath) => {
-    return new URL(`file://${filePath}`);
-};
 /*
  * Core logic of this whole library, arguably. Should return a full express() app, ready to be
  * served via http.
@@ -76,6 +74,11 @@ const configureHttpServer = async () => {
         // Search for .config files
         const pathToConfigFile = (0, tree_traversal_1.findSingleFile)(pathToDomain, ".union.config.js");
         if (pathToConfigFile && fs_1.default.existsSync(pathToConfigFile)) {
+            logger_1.default.log({
+                domain: match,
+                locationInCode: "configureHttpServer",
+                entry: "found config file",
+            });
             // Process config file
             try {
                 // Dynamically import the config file's exported app
@@ -85,7 +88,7 @@ const configureHttpServer = async () => {
                 domainSpecificMiddleware.use(customAppConfig);
             }
             catch (error) {
-                console.error("error importing config file:", error);
+                console.error(`error importing config file for ${pathToDomain}:`, error);
             }
         }
         /*
@@ -96,6 +99,11 @@ const configureHttpServer = async () => {
         if (containsHtmlDirectory(pathToDomain)) {
             pathToDomain = path_1.default.join(pathToDomain, "html");
         }
+        logger_1.default.log({
+            locationInCode: "configureHttpServer",
+            domain: match,
+            entry: `beginning search for per-directory config files in ${pathToDomain}`,
+        });
         // Search for .do-not-serve & .union-password files
         Promise.all([
             (0, tree_traversal_1.findFilesRecursive)(pathToDomain, ".do-not-serve"),
@@ -105,18 +113,30 @@ const configureHttpServer = async () => {
             // results is an array containing the results of each promise in the order they were in the array
             const directoriesNotToServe = results[0];
             const directoriesToPasswordProtect = results[1];
-            console.log({ directoriesNotToServe });
-            console.log({ directoriesToPasswordProtect });
+            logger_1.default.log({
+                locationInCode: "configureHttpServer",
+                domain: match,
+                entry: [
+                    "found these directories not to serve: ",
+                    directoriesNotToServe,
+                ],
+            });
+            logger_1.default.log({
+                locationInCode: "configureHttpServer",
+                domain: match,
+                entry: [
+                    "found these directories to password protect: ",
+                    directoriesToPasswordProtect,
+                ],
+            });
             directoriesNotToServe.forEach((pathToDoNotServeFile) => {
                 // Extract the relative path of the directory containing the .do-not-serve file
                 const relativePath = path_1.default.relative(pathToDomain, path_1.default.dirname(pathToDoNotServeFile));
                 const routePath = `/${relativePath}/*`; // Format correctly for Express
                 // Configure middleware to skip serving this path
                 app.use(routePath, (req, res, next) => {
-                    console.log("pwd");
                     return res.status(404).send(_404_1.default);
                 });
-                console.log(`configured to not serve: ${routePath}`);
             });
             directoriesToPasswordProtect.forEach((pathToPasswordFile) => {
                 // Read and parse the .union-password file to get credentials
@@ -148,7 +168,6 @@ const configureHttpServer = async () => {
                     }
                     next(); // User is authenticated, proceed to next middleware or route handler
                 });
-                console.log(`Configured to password protect: ${routePath}`);
             });
         })
             .catch((error) => {

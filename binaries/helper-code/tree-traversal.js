@@ -22,11 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.findFilesRecursive = exports.findSingleFile = exports.findDomainSubdirectories = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 const utilities_1 = require("./utilities");
+const logger_1 = __importDefault(require("./logger"));
 /*
  * Synchronous function to find direct child directories of `pathToCheck` that are also
  * valid domain names.
@@ -44,7 +48,13 @@ const findDomainSubdirectories = (pathToCheck = ".") => {
         return entries
             .filter((entry) => (0, utilities_1.isDirectoryOrSymlinkDirectory)(fullPath, entry) &&
             (0, utilities_1.isValidDomain)(entry.name))
-            .map((entry) => entry.name);
+            .map((entry) => {
+            logger_1.default.log({
+                locationInCode: "findDomainSubdirectories",
+                entry: `found directory that looks like a domain name: ${entry.name}`,
+            });
+            return entry.name;
+        });
     }
     catch (error) {
         console.log(`error reading subdirectories of ${pathToCheck}`);
@@ -57,7 +67,6 @@ const findSingleFile = (pathToCheck, filename) => {
     try {
         const files = fs.readdirSync(pathToCheck);
         for (const file of files) {
-            console.log("findSingleFile > found file: ", file);
             if (file === filename) {
                 return path.join(pathToCheck, filename);
             }

@@ -4,6 +4,7 @@ import pm2 from "pm2";
 
 import configureSSL from "./server/ssl";
 import configureHttpServer from "./server/configure";
+import logger from "./helper-code/logger";
 import showStatus from "./commands/status";
 import stopAllProcesses from "./commands/stop";
 import showHelp from "./commands/help";
@@ -28,6 +29,27 @@ switch (args[0]) {
     break;
   case "help":
     showHelp();
+    break;
+  case "lint":
+    configureHttpServer()
+      .then((httpApp) => {
+        const httpPort = args[1] || DEFAULT_HTTP_PORT;
+
+        configureSSL(httpApp);
+        const httpsPort = args[2] || DEFAULT_HTTPS_PORT;
+
+        // TODO: test permissions to open process on PORT NOs
+        logger.log({
+          locationInCode: "server startup:",
+          entry: `union would listen for http traffic on port ${httpPort}`,
+        });
+        logger.log({
+          locationInCode: "server startup:",
+          entry: `union would listen for https traffic on port ${httpsPort}`,
+        });
+      })
+      .catch((error) => console.error("fatal error configuring app: ", error))
+      .finally(() => logger.flushLogs());
     break;
   default:
     /**

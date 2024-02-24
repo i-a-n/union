@@ -4,6 +4,7 @@ import vhttps, { Credential } from "vhttps";
 import { Express as ExpressType } from "express";
 
 import { findDomainSubdirectories } from "../helper-code/tree-traversal";
+import logger from "../helper-code/logger";
 
 const getCertificateFiles = (
   match: string
@@ -15,14 +16,14 @@ const getCertificateFiles = (
   try {
     cert = fs.readFileSync(path.join(basePath, "fullchain.pem"), "utf8");
   } catch (error: any) {
-    console.error(`error reading certificate file for ${match}:`, error);
+    console.error(`error reading SSL certificate file for ${match}:`, error);
     cert = "";
   }
 
   try {
     key = fs.readFileSync(path.join(basePath, "privkey.pem"), "utf8");
   } catch (error: any) {
-    console.error(`error reading key file for ${match}:`, error);
+    console.error(`error reading SSL key file for ${match}:`, error);
     key = "";
   }
 
@@ -41,7 +42,13 @@ const configureSSL = (app: ExpressType) => {
     });
   });
 
-  console.log("creating SSL server with these certs: ", certificates);
+  logger.log({
+    locationInCode: "configureSSL",
+    entry: [
+      "creating SSL server with these certs: ",
+      certificates.map((cert) => cert.hostname),
+    ],
+  });
 
   return vhttps.createServer({}, certificates, app);
 };

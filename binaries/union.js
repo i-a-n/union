@@ -7,6 +7,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const pm2_1 = __importDefault(require("pm2"));
 const ssl_1 = __importDefault(require("./server/ssl"));
 const configure_1 = __importDefault(require("./server/configure"));
+const logger_1 = __importDefault(require("./helper-code/logger"));
 const status_1 = __importDefault(require("./commands/status"));
 const stop_1 = __importDefault(require("./commands/stop"));
 const help_1 = __importDefault(require("./commands/help"));
@@ -27,6 +28,25 @@ switch (args[0]) {
         break;
     case "help":
         (0, help_1.default)();
+        break;
+    case "lint":
+        (0, configure_1.default)()
+            .then((httpApp) => {
+            const httpPort = args[1] || DEFAULT_HTTP_PORT;
+            (0, ssl_1.default)(httpApp);
+            const httpsPort = args[2] || DEFAULT_HTTPS_PORT;
+            // TODO: test permissions to open process on PORT NOs
+            logger_1.default.log({
+                locationInCode: "server startup:",
+                entry: `union would listen for http traffic on port ${httpPort}`,
+            });
+            logger_1.default.log({
+                locationInCode: "server startup:",
+                entry: `union would listen for https traffic on port ${httpsPort}`,
+            });
+        })
+            .catch((error) => console.error("fatal error configuring app: ", error))
+            .finally(() => logger_1.default.flushLogs());
         break;
     default:
         /**

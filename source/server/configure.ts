@@ -13,6 +13,7 @@ import {
   findSingleFile,
 } from "../helper-code/tree-traversal";
 import errorPageHTML from "../html/404";
+import logger from "../helper-code/logger";
 
 // Synchronous function to check for the existence of a direct-child 'html' directory
 const containsHtmlDirectory = (pathToDirectory: string): boolean => {
@@ -59,6 +60,11 @@ const configureHttpServer = async (): Promise<express.Express> => {
       const pathToConfigFile = findSingleFile(pathToDomain, ".union.config.js");
 
       if (pathToConfigFile && fs.existsSync(pathToConfigFile)) {
+        logger.log({
+          domain: match,
+          locationInCode: "configureHttpServer",
+          entry: "found config file",
+        });
         // Process config file
         try {
           // Dynamically import the config file's exported app
@@ -68,7 +74,10 @@ const configureHttpServer = async (): Promise<express.Express> => {
           // Use the imported app as middleware
           domainSpecificMiddleware.use(customAppConfig);
         } catch (error) {
-          console.error("error importing config file:", error);
+          console.error(
+            `error importing config file for ${pathToDomain}:`,
+            error
+          );
         }
       }
 
@@ -81,6 +90,12 @@ const configureHttpServer = async (): Promise<express.Express> => {
         pathToDomain = path.join(pathToDomain, "html");
       }
 
+      logger.log({
+        locationInCode: "configureHttpServer",
+        domain: match,
+        entry: `beginning search for per-directory config files in ${pathToDomain}`,
+      });
+
       // Search for .do-not-serve & .union-password files
       Promise.all([
         findFilesRecursive(pathToDomain, ".do-not-serve"),
@@ -91,8 +106,23 @@ const configureHttpServer = async (): Promise<express.Express> => {
           const directoriesNotToServe = results[0];
           const directoriesToPasswordProtect = results[1];
 
-          console.log({ directoriesNotToServe });
-          console.log({ directoriesToPasswordProtect });
+          logger.log({
+            locationInCode: "configureHttpServer",
+            domain: match,
+            entry: [
+              "found these directories not to serve: ",
+              directoriesNotToServe,
+            ],
+          });
+
+          logger.log({
+            locationInCode: "configureHttpServer",
+            domain: match,
+            entry: [
+              "found these directories to password protect: ",
+              directoriesToPasswordProtect,
+            ],
+          });
 
           directoriesNotToServe.forEach((pathToDoNotServeFile) => {
             // Extract the relative path of the directory containing the .do-not-serve file
@@ -105,11 +135,8 @@ const configureHttpServer = async (): Promise<express.Express> => {
 
             // Configure middleware to skip serving this path
             app.use(routePath, (req, res, next) => {
-              console.log("pwd");
               return res.status(404).send(errorPageHTML);
             });
-
-            console.log(`configured to not serve: ${routePath}`);
           });
 
           directoriesToPasswordProtect.forEach((pathToPasswordFile) => {
@@ -156,8 +183,6 @@ const configureHttpServer = async (): Promise<express.Express> => {
 
               next(); // User is authenticated, proceed to next middleware or route handler
             });
-
-            console.log(`Configured to password protect: ${routePath}`);
           });
         })
         .catch((error) => {

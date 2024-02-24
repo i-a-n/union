@@ -17,10 +17,10 @@ const showStatus = () => {
         process.exit(2);
       }
 
-      console.log("union servers:");
+      console.log("union server status:");
       processDescriptionList.forEach((proc) => {
         console.log(
-          `status: ${proc.pm2_env?.status}, process ID: ${
+          `${proc.pm2_env?.status}, process ID: ${
             proc.pid
           }, uptime: ${formatElapsedTime(
             Date.now() - (proc.pm2_env?.pm_uptime ?? 0)

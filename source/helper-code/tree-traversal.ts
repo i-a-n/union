@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 import { isDirectoryOrSymlinkDirectory, isValidDomain } from "./utilities";
+import logger from "./logger";
 
 /*
  * Synchronous function to find direct child directories of `pathToCheck` that are also
@@ -25,7 +26,13 @@ export const findDomainSubdirectories = (
           isDirectoryOrSymlinkDirectory(fullPath, entry) &&
           isValidDomain(entry.name)
       )
-      .map((entry) => entry.name);
+      .map((entry) => {
+        logger.log({
+          locationInCode: "findDomainSubdirectories",
+          entry: `found directory that looks like a domain name: ${entry.name}`,
+        });
+        return entry.name;
+      });
   } catch (error) {
     console.log(`error reading subdirectories of ${pathToCheck}`);
     return [];
@@ -40,7 +47,6 @@ export const findSingleFile = (
   try {
     const files = fs.readdirSync(pathToCheck);
     for (const file of files) {
-      console.log("findSingleFile > found file: ", file);
       if (file === filename) {
         return path.join(pathToCheck, filename);
       }

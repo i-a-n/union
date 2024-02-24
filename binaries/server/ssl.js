@@ -7,6 +7,7 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const vhttps_1 = __importDefault(require("vhttps"));
 const tree_traversal_1 = require("../helper-code/tree-traversal");
+const logger_1 = __importDefault(require("../helper-code/logger"));
 const getCertificateFiles = (match) => {
     const basePath = path_1.default.join(process.cwd(), `./certificates/${match}`);
     let cert;
@@ -15,14 +16,14 @@ const getCertificateFiles = (match) => {
         cert = fs_1.default.readFileSync(path_1.default.join(basePath, "fullchain.pem"), "utf8");
     }
     catch (error) {
-        console.error(`error reading certificate file for ${match}:`, error);
+        console.error(`error reading SSL certificate file for ${match}:`, error);
         cert = "";
     }
     try {
         key = fs_1.default.readFileSync(path_1.default.join(basePath, "privkey.pem"), "utf8");
     }
     catch (error) {
-        console.error(`error reading key file for ${match}:`, error);
+        console.error(`error reading SSL key file for ${match}:`, error);
         key = "";
     }
     return { cert, key };
@@ -37,7 +38,13 @@ const configureSSL = (app) => {
             ...getCertificateFiles(match),
         });
     });
-    console.log("creating SSL server with these certs: ", certificates);
+    logger_1.default.log({
+        locationInCode: "configureSSL",
+        entry: [
+            "creating SSL server with these certs: ",
+            certificates.map((cert) => cert.hostname),
+        ],
+    });
     return vhttps_1.default.createServer({}, certificates, app);
 };
 exports.default = configureSSL;
