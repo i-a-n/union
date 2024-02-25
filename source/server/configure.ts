@@ -46,6 +46,11 @@ const configureHttpServer = async (): Promise<express.Express> => {
   // Loop through candidate subdirectories and configure each one into `app`
   const matches = findDomainSubdirectories();
 
+  logger.log({
+    locationInCode: "configureHttpServer",
+    entry: ["found the following domains to configure: ", matches],
+  });
+
   await Promise.all(
     matches.map(async (match) => {
       let pathToDomain = path.join(process.cwd(), match);

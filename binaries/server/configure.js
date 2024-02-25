@@ -64,6 +64,10 @@ const configureHttpServer = async () => {
     const app = (0, express_1.default)();
     // Loop through candidate subdirectories and configure each one into `app`
     const matches = (0, tree_traversal_1.findDomainSubdirectories)();
+    logger_1.default.log({
+        locationInCode: "configureHttpServer",
+        entry: ["found the following domains to configure: ", matches],
+    });
     await Promise.all(matches.map(async (match) => {
         let pathToDomain = path_1.default.join(process.cwd(), match);
         /*
