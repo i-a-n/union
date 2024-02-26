@@ -4,13 +4,13 @@ import pm2 from "pm2";
 
 import configureSSL from "./server/ssl";
 import configureHttpServer from "./server/configure";
-import logger from "./helper-code/logger";
+import lint from "./commands/lint";
 import showStatus from "./commands/status";
 import stopAllProcesses from "./commands/stop";
 import showHelp from "./commands/help";
 
-const DEFAULT_HTTP_PORT = 80;
-const DEFAULT_HTTPS_PORT = 443;
+export const DEFAULT_HTTP_PORT = 80;
+export const DEFAULT_HTTPS_PORT = 443;
 
 // Check if it's the child process
 function isChildProcess() {
@@ -31,25 +31,7 @@ switch (args[0]) {
     showHelp();
     break;
   case "lint":
-    configureHttpServer()
-      .then((httpApp) => {
-        const httpPort = args[1] || DEFAULT_HTTP_PORT;
-
-        configureSSL(httpApp);
-        const httpsPort = args[2] || DEFAULT_HTTPS_PORT;
-
-        // TODO: test permissions to open process on PORT NOs
-        logger.log({
-          locationInCode: "server startup:",
-          entry: `union would listen for http traffic on port ${httpPort}`,
-        });
-        logger.log({
-          locationInCode: "server startup:",
-          entry: `union would listen for https traffic on port ${httpsPort}`,
-        });
-      })
-      .catch((error) => console.error("fatal error configuring app: ", error))
-      .finally(() => logger.flushLogs());
+    lint();
     break;
   default:
     /**

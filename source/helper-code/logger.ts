@@ -15,6 +15,8 @@ interface UnionLogEntry {
   sequence: number;
 }
 
+const SORT_ME_LAST_UNICODE = "\uFFFF";
+
 /*
  * Since the config and server startup functions are a big mix of sync/async, the logging often
  * gets weird, so this helper class will store the logs during execution, then flush them to
@@ -43,11 +45,28 @@ class Logger {
   flushLogs() {
     this.logs
       .sort((a, b) => {
-        // First, sort by domain
-        if ((a.domain ?? "") < (b.domain ?? "")) return -1;
-        if ((a.domain ?? "") > (b.domain ?? "")) return 1;
+        /*
+         * Sorting the logs can be a bit tricky. We want to sort all the log messages by the domain
+         * name that threw the log.. but many logs are thrown without a specific domain name
+         * attached. We can sort those too of course, but we always want them to come at the very
+         * end of the logs, because in practice it makes way more sense to read them this way.
+         * So the best way I found to do that, maybe it's hacky, but if a domain isn't there we
+         * sort that log as if it were the very last unicode character, so no domain name could
+         * ever come after it. Yes, we could probably do an extra if statement and just return
+         * `1`, but this felt like the most intuitive way to implement and talk about this concept.
+         */
+        if (
+          (a.domain ?? SORT_ME_LAST_UNICODE) <
+          (b.domain ?? SORT_ME_LAST_UNICODE)
+        )
+          return -1;
+        if (
+          (a.domain ?? SORT_ME_LAST_UNICODE) >
+          (b.domain ?? SORT_ME_LAST_UNICODE)
+        )
+          return 1;
 
-        // If domains are equal or non existent, compare by sequence
+        // If domains are equal (or both non existent), compare by sequence
         return a.sequence - b.sequence;
       })
       .forEach((log) => {

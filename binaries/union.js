@@ -4,15 +4,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.DEFAULT_HTTPS_PORT = exports.DEFAULT_HTTP_PORT = void 0;
 const pm2_1 = __importDefault(require("pm2"));
 const ssl_1 = __importDefault(require("./server/ssl"));
 const configure_1 = __importDefault(require("./server/configure"));
-const logger_1 = __importDefault(require("./helper-code/logger"));
+const lint_1 = __importDefault(require("./commands/lint"));
 const status_1 = __importDefault(require("./commands/status"));
 const stop_1 = __importDefault(require("./commands/stop"));
 const help_1 = __importDefault(require("./commands/help"));
-const DEFAULT_HTTP_PORT = 80;
-const DEFAULT_HTTPS_PORT = 443;
+exports.DEFAULT_HTTP_PORT = 80;
+exports.DEFAULT_HTTPS_PORT = 443;
 // Check if it's the child process
 function isChildProcess() {
     return process.env.CHILD_PROCESS === "true";
@@ -30,23 +31,7 @@ switch (args[0]) {
         (0, help_1.default)();
         break;
     case "lint":
-        (0, configure_1.default)()
-            .then((httpApp) => {
-            const httpPort = args[1] || DEFAULT_HTTP_PORT;
-            (0, ssl_1.default)(httpApp);
-            const httpsPort = args[2] || DEFAULT_HTTPS_PORT;
-            // TODO: test permissions to open process on PORT NOs
-            logger_1.default.log({
-                locationInCode: "server startup:",
-                entry: `union would listen for http traffic on port ${httpPort}`,
-            });
-            logger_1.default.log({
-                locationInCode: "server startup:",
-                entry: `union would listen for https traffic on port ${httpsPort}`,
-            });
-        })
-            .catch((error) => console.error("fatal error configuring app: ", error))
-            .finally(() => logger_1.default.flushLogs());
+        (0, lint_1.default)();
         break;
     default:
         /**
@@ -60,9 +45,9 @@ switch (args[0]) {
         if (isChildProcess()) {
             (0, configure_1.default)()
                 .then((httpApp) => {
-                const httpPort = args[1] || DEFAULT_HTTP_PORT;
+                const httpPort = args[1] || exports.DEFAULT_HTTP_PORT;
                 const httpsApp = (0, ssl_1.default)(httpApp);
-                const httpsPort = args[2] || DEFAULT_HTTPS_PORT;
+                const httpsPort = args[2] || exports.DEFAULT_HTTPS_PORT;
                 httpApp.listen(httpPort);
                 httpsApp.listen(httpsPort);
             })

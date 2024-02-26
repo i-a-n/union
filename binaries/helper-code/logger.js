@@ -24,9 +24,9 @@ class Logger {
             .sort((a, b) => {
             var _a, _b, _c, _d;
             // First, sort by domain
-            if (((_a = a.domain) !== null && _a !== void 0 ? _a : "") < ((_b = b.domain) !== null && _b !== void 0 ? _b : ""))
+            if (((_a = a.domain) !== null && _a !== void 0 ? _a : "\uFFFF") < ((_b = b.domain) !== null && _b !== void 0 ? _b : "\uFFFF"))
                 return -1;
-            if (((_c = a.domain) !== null && _c !== void 0 ? _c : "") > ((_d = b.domain) !== null && _d !== void 0 ? _d : ""))
+            if (((_c = a.domain) !== null && _c !== void 0 ? _c : "\uFFFF") > ((_d = b.domain) !== null && _d !== void 0 ? _d : "\uFFFF"))
                 return 1;
             // If domains are equal or non existent, compare by sequence
             return a.sequence - b.sequence;
