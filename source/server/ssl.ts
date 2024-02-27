@@ -3,8 +3,8 @@ import path from "path";
 import vhttps, { Credential } from "vhttps";
 import { Express as ExpressType } from "express";
 
-import { findDomainSubdirectories } from "../helper-code/tree-traversal";
 import logger from "../helper-code/logger";
+import { findDomainSubdirectories } from "../helper-code/tree-traversal";
 
 const getCertificateFiles = (
   match: string
@@ -36,6 +36,9 @@ const configureSSL = (app: ExpressType) => {
   // Loop through directories in `./certificates`, looking for domain names
   const matches = findDomainSubdirectories("./certificates");
   matches.forEach((match) => {
+    logger.printDuringStartup(
+      `retrieving certificate files for ${match.toUpperCase()}`
+    );
     certificates.push({
       hostname: match,
       ...getCertificateFiles(match),

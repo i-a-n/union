@@ -33,10 +33,10 @@ const fs_1 = __importDefault(require("fs"));
 const path_1 = __importDefault(require("path"));
 const serve_static_1 = __importDefault(require("serve-static"));
 const vhost_1 = __importDefault(require("vhost"));
-const utilities_1 = require("../helper-code/utilities");
-const tree_traversal_1 = require("../helper-code/tree-traversal");
-const _404_1 = __importDefault(require("../html/404"));
 const logger_1 = __importDefault(require("../helper-code/logger"));
+const tree_traversal_1 = require("../helper-code/tree-traversal");
+const utilities_1 = require("../helper-code/utilities");
+const _404_1 = __importDefault(require("../html/404"));
 // Synchronous function to check for the existence of a direct-child 'html' directory
 const containsHtmlDirectory = (pathToDirectory) => {
     try {
@@ -103,6 +103,7 @@ const configureHttpServer = async () => {
         if (containsHtmlDirectory(pathToDomain)) {
             pathToDomain = path_1.default.join(pathToDomain, "html");
         }
+        logger_1.default.printDuringStartup(`found domain ${match.toUpperCase()} - serving from ${pathToDomain}`);
         logger_1.default.log({
             locationInCode: "configureHttpServer",
             domain: match,

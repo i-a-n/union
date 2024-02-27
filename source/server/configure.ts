@@ -6,14 +6,14 @@ import path from "path";
 import serveStatic from "serve-static";
 import vhost from "vhost";
 
-import { isDirectoryOrSymlinkDirectory } from "../helper-code/utilities";
+import logger from "../helper-code/logger";
 import {
   findDomainSubdirectories,
   findFilesRecursive,
   findSingleFile,
 } from "../helper-code/tree-traversal";
+import { isDirectoryOrSymlinkDirectory } from "../helper-code/utilities";
 import errorPageHTML from "../html/404";
-import logger from "../helper-code/logger";
 
 // Synchronous function to check for the existence of a direct-child 'html' directory
 const containsHtmlDirectory = (pathToDirectory: string): boolean => {
@@ -94,6 +94,10 @@ const configureHttpServer = async (): Promise<express.Express> => {
       if (containsHtmlDirectory(pathToDomain)) {
         pathToDomain = path.join(pathToDomain, "html");
       }
+
+      logger.printDuringStartup(
+        `found domain ${match.toUpperCase()} - serving from ${pathToDomain}`
+      );
 
       logger.log({
         locationInCode: "configureHttpServer",

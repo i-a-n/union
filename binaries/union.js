@@ -6,12 +6,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DEFAULT_HTTPS_PORT = exports.DEFAULT_HTTP_PORT = void 0;
 const pm2_1 = __importDefault(require("pm2"));
-const ssl_1 = __importDefault(require("./server/ssl"));
 const configure_1 = __importDefault(require("./server/configure"));
+const ssl_1 = __importDefault(require("./server/ssl"));
 const lint_1 = __importDefault(require("./commands/lint"));
+const logger_1 = __importDefault(require("./helper-code/logger"));
+const help_1 = __importDefault(require("./commands/help"));
 const status_1 = __importDefault(require("./commands/status"));
 const stop_1 = __importDefault(require("./commands/stop"));
-const help_1 = __importDefault(require("./commands/help"));
 exports.DEFAULT_HTTP_PORT = 80;
 exports.DEFAULT_HTTPS_PORT = 443;
 // Check if it's the child process
@@ -48,8 +49,8 @@ switch (args[0]) {
                 const httpPort = args[1] || exports.DEFAULT_HTTP_PORT;
                 const httpsApp = (0, ssl_1.default)(httpApp);
                 const httpsPort = args[2] || exports.DEFAULT_HTTPS_PORT;
-                httpApp.listen(httpPort);
-                httpsApp.listen(httpsPort);
+                httpApp.listen(httpPort, () => logger_1.default.printDuringStartup(`union server (http) is running on port ${httpPort}`));
+                httpsApp.listen(httpsPort, () => logger_1.default.printDuringStartup(`union server (https) is running on port ${httpsPort}`));
             })
                 .catch((error) => console.error("error configuring app: ", error));
         }

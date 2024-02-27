@@ -2,12 +2,13 @@
 
 import pm2 from "pm2";
 
-import configureSSL from "./server/ssl";
 import configureHttpServer from "./server/configure";
+import configureSSL from "./server/ssl";
 import lint from "./commands/lint";
+import logger from "./helper-code/logger";
+import showHelp from "./commands/help";
 import showStatus from "./commands/status";
 import stopAllProcesses from "./commands/stop";
-import showHelp from "./commands/help";
 
 export const DEFAULT_HTTP_PORT = 80;
 export const DEFAULT_HTTPS_PORT = 443;
@@ -50,8 +51,16 @@ switch (args[0]) {
           const httpsApp = configureSSL(httpApp);
           const httpsPort = args[2] || DEFAULT_HTTPS_PORT;
 
-          httpApp.listen(httpPort);
-          httpsApp.listen(httpsPort);
+          httpApp.listen(httpPort, () =>
+            logger.printDuringStartup(
+              `union server (http) is running on port ${httpPort}`
+            )
+          );
+          httpsApp.listen(httpsPort, () =>
+            logger.printDuringStartup(
+              `union server (https) is running on port ${httpsPort}`
+            )
+          );
         })
         .catch((error) => console.error("error configuring app: ", error));
     } else {

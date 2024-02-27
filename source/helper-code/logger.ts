@@ -42,6 +42,14 @@ class Logger {
     this.logs.push({ sequence: seq, ...logEntry });
   }
 
+  // we only want to print some things during startup (not during lint)
+  printDuringStartup(entry: any) {
+    // CHILD_PROCESS is only true during startup
+    if (process.env.CHILD_PROCESS) {
+      console.log(entry);
+    }
+  }
+
   flushLogs() {
     this.logs
       .sort((a, b) => {

@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.isValidDomain = exports.isDirectoryOrSymlinkDirectory = exports.formatElapsedTime = void 0;
-const path_1 = __importDefault(require("path"));
 const fs_1 = __importDefault(require("fs"));
+const path_1 = __importDefault(require("path"));
 // Helper function to format milliseconds into human-readable format
 const formatElapsedTime = (ms) => {
     const seconds = Math.floor(ms / 1000);
