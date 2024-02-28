@@ -218,12 +218,13 @@ here's an example of that file:
 ```
 [Unit]
 Description=union
-After=network.target
+After=network-online.target multi-user.target
 
 [Service]
-Type=simple
+Type=forking
 User=<your user>
-WorkingDirectory=<path to your web root directory>
+Group=<your user's group>
+WorkingDirectory=<path to your domains directory; e.g. /var/www/vhosts>
 ExecStart=/usr/bin/npx union
 Restart=on-failure
 
@@ -235,8 +236,8 @@ WantedBy=multi-user.target
    after creating the service file, enable it to start at boot and then start the service immediately with the following commands:
 
 ```
-sudo systemctl enable union.service
-sudo systemctl start union.service
+sudo systemctl enable union
+sudo systemctl start union
 ```
 
 </details>
