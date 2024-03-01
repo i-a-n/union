@@ -103,6 +103,23 @@ app.get('*', (req, res) => {
 module.exports = app;
 ```
 
+or, here's an example of how to blanket-enable CORS:
+
+```
+// include express
+const express = require('express');
+const cors = require('cors');
+
+// then configure an express app like usual
+const app = express();
+
+// allow cors
+app.use('*', cors({ origin: true }));
+
+// export your express server. union will know what to do with it.
+module.exports = app;
+```
+
 2. putting a blank `.do-not-serve` file in a directory will keep union from serving that entire directory
 
 ```
