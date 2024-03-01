@@ -34,7 +34,7 @@ let's say you have a traditional `/var/www/vhosts` directory, and it looks like 
 run the following:
 
 1. `npm init`
-2. `npm install @i-a-n/union`
+2. `npm install @union.io/union`
 3. `npx union`
 
 running these three commands in your `/var/www/vhosts` directory is all you need to do. union will detect the three directories that look like domain names, and serve them as three separate domains with their own document roots by default. it will also handle the case where an `html/` directory is present and serve that instead (like in the `alpha.com` example above).
