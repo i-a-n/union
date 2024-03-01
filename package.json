@@ -1,6 +1,6 @@
 {
   "name": "@union.io/union",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "a node web server made for multi-domain hosting",
   "main": "binaries/union.js",
   "bin": {
